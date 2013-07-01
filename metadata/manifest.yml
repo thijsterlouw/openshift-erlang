@@ -26,7 +26,7 @@ Cart-Data:
   - Key: OPENSHIFT_REPO_DIR
     Type: environemnt
     Description: "Application root directory where application files reside. This directory is reset every time you do a git-push"
-  - Key: OPENSHIFT_ERL_HTTP_PORT
+  - Key: OPENSHIFT_ERL_PORT
     Type: environment
     Description: "Internal HTTP port to which the VM binds to."
   - Key: OPENSHIFT_ERL_CLUSTER_PORT
@@ -51,8 +51,8 @@ Cart-Data:
     Type: environment
     Description: "Unique ID which identified the gear. This value changes between gears."
 Provides:
-  - erl-15b
-  - erlang
+  - erl-15
+  - "erlang"
 Publishes:
   publish-http-url:
     Type: "NET_TCP:httpd-proxy-info"
@@ -70,6 +70,7 @@ Scaling:
   Max: -1
 Group-Overrides:
   - components:
+    - erl-15
     - web_proxy
 Endpoints:
   - Private-IP-Name:   IP
