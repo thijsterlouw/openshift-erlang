@@ -1,4 +1,3 @@
-openshift-erlang
-================
+# OpenShift Erlang Cartridge
 
-Erlang cartridge for OpenShift
+Experimental Erlang cartridge
