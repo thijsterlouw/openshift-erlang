@@ -73,9 +73,9 @@ Group-Overrides:
     - web_proxy
 Endpoints:
   - Private-IP-Name:   IP
-    Private-Port-Name: HTTP_PORT
+    Private-Port-Name: PORT
     Private-Port:      8080
-    Public-Port-Name:  HTTP_PROXY_PORT
+    Public-Port-Name:  PROXY_PORT
     Mappings:
       - Frontend:      ""
         Backend:       ""
