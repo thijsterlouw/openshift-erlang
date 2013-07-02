@@ -17,6 +17,7 @@ function is_erl_running() {
       ERL_PID=$(cat $PIDFILE 2>/dev/null)
       $(ps --pid $ERL_PID) && return 0
       return 1
+    fi
 }
 
 function start() {
