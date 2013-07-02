@@ -20,6 +20,9 @@ Cart-Data:
   - Key: OPENSHIFT_ERL_LOG_DIR
     Type: environment
     Description: "Directory to store application log files."
+  - Key: OPENSHIFT_ERL_RUN_DIR
+    Type: environment
+    Description: "Directory to store application runtime data."
   - Key: OPENSHIFT_TMP_DIR
     Type: environment
     Description: "Directory to store application temporary files."
@@ -31,7 +34,7 @@ Cart-Data:
     Description: "Internal HTTP port to which the VM binds to."
   - Key: OPENSHIFT_ERL_CLUSTER_PORT
     Type: environment
-    Description: "Internal TCP port to which the VM binds to for clustering purposes."
+    Description: "Internal TCP port to which the VM binds for clustering purposes."
   - Key: OPENSHIFT_ERL_IP
     Type: environment
     Description: "Internal IP to which the VM binds to."
