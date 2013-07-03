@@ -35,6 +35,9 @@ Cart-Data:
   - Key: OPENSHIFT_ERL_CLUSTER_PORT
     Type: environment
     Description: "Internal TCP port to which the VM binds for clustering purposes."
+  - Key: OPENSHIFT_ERL_CLUSTER_PROXY_PORT
+    Type: environment
+    Description: "External TCP port which is forwarded to OPENSHIFT_ERL_IP:OPENSHIFT_ERL_CLUSTER_PORT"
   - Key: OPENSHIFT_ERL_IP
     Type: environment
     Description: "Internal IP to which the VM binds to."

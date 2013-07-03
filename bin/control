@@ -22,8 +22,8 @@ function is_erl_running() {
 
 function start() {
     echo "Starting Erlang cartridge"
-    erl -kernel inet_dist_listen_min ${OPENSHIFT_ERL_CLUSTER_PORT} \
-      inet_dist_listen_max ${OPENSHIFT_ERL_CLUSTER_PORT} \
+    erl -kernel inet_dist_listen_min ${OPENSHIFT_ERL_CLUSTER_PROXY_PORT} \
+      inet_dist_listen_max ${OPENSHIFT_ERL_CLUSTER_PROXY_PORT} \
       inet_dist_use_interface ${OPENSHIFT_ERL_USE_INTERFACE} \
       -name "${OPENSHIFT_GEAR_UUID}@${OPENSHIFT_GEAR_DNS}" \
       -setcookie bla -detached
