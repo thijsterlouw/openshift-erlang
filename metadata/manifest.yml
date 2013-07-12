@@ -11,11 +11,12 @@ Cartridge-Vendor: spilgames
 Vendor: erlang.org
 # The Erlang cartridge is acting as a service. This cartridge does not expose itself as a
 # web-service by itself; in that sense it is slightly different than most other catridges.
+# OpenShift currently requires a web cartridge type. SUCKS.
 Categories:
   - service
   - erlang
   - experimental
-  - embedded
+  - web cartridge
 Website: https://github.com/spilgames/
 Cart-Data:
   - Key: OPENSHIFT_ERL_LOG_DIR
