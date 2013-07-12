@@ -1,0 +1,5 @@
+## Name of the node
+-name myname
+
+## Cookie for distributed erlang
+-setcookie mycookie
