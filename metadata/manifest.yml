@@ -3,19 +3,20 @@ Cartridge-Short-Name: ERL
 Display-Name: Erlang 15
 Source-Url: git://github.com/spil-jasper/openshift-erlang.git
 Description: "Erlang OTP framework for OpenShift"
-Version: '15'
+Version: "15"
 License: "ASL 2.0"
 License-Url: http://www.apache.org/licenses/LICENSE-2.0.txt
 Cartridge-Version: 0.0.1
-Cartridge-Vendor: spil
-Vendor: erlang
+Cartridge-Vendor: spilgames
+Vendor: erlang.org
+# The Erlang cartridge is acting as a service. This cartridge does not expose itself as a
+# web-service by itself; in that sense it is slightly different than most other catridges.
 Categories:
-  - erlang
-  - web_framework
-  - experimental
   - service
-Website:
-Help-Topics:
+  - erlang
+  - experimental
+  - embedded
+Website: https://github.com/spilgames/
 Cart-Data:
   - Key: OPENSHIFT_ERL_LOG_DIR
     Type: environment
@@ -59,18 +60,16 @@ Cart-Data:
 Provides:
   - erl-15
   - "erlang"
+# ERLANG-CLUSTER-INFO: this event is used to inform other gears about the existance of this gear.
+#     The other gears need to know the Host, so they can find the EPMD on the new gear,
+#     ask which nodes are running there and then form a network.
 Publishes:
-  publish-http-url:
-    Type: "NET_TCP:httpd-proxy-info"
-  publish-gear-endpoint:
-    Type: "NET_TCP:gear-endpoint-info"
+  publish-erlang-cluster:
+    Type: "NET_TCP:erlang-cluster-info"
+    Description: "Inform other gears about the existance of this gear"
 Subscribes:
-  set-db-connection-info:
-    Type: "ENV:NET_TCP:db:connection-info"
-    Required: false
-  set-nosql-db-connection-info:
-    Type: "ENV:NET_TCP:nosqldb:connection-info"
-    Required: false
+  set-erlang-cluster:
+    Type: "NET_TCP:erlang-cluster-info"
 Scaling:
   Min: 1
   Max: -1
@@ -78,18 +77,10 @@ Group-Overrides:
   - components:
     - erl-15
     - web_proxy
+# CLUSTER_PROXY_PORT: Erlang distribution needs a public listening port, because Erlang Nodes
+#     need to connect directly with eachother (they normally form a fully connected network).
+#     The value of the private port is not important.
 Endpoints:
-  - Private-IP-Name:   IP
-    Private-Port-Name: PORT
-    Private-Port:      8080
-    Public-Port-Name:  PROXY_PORT
-    Mappings:
-      - Frontend:      ""
-        Backend:       ""
-        Options:       { websocket: true }
-      - Frontend:      "/health"
-        Backend:       ""
-        Options:       { health: true }
   - Private-IP-Name:   IP
     Private-Port-Name: CLUSTER_PORT
     Private-Port:      30000

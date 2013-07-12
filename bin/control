@@ -1,43 +1,115 @@
 #!/bin/bash
+
+set -e
+
+if [ "$OPENSHIFT_CARTRIDGE_SDK_BASH" == "" ]; then
+    DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    OPENSHIFT_CARTRIDGE_SDK_BASH="${DIR}/test/bash"
+fi
+
 source $OPENSHIFT_CARTRIDGE_SDK_BASH
-PIDFILE=${OPENSHIFT_ERL_RUN_DIR}/erl.pid
 
+# TODO REMOVE ?
 function run_hook() {
-  local path="$OPENSHIFT_REPO_DIR/.openshift/action_hooks/$1"
-  if [ -f "$path" -a -x "$path" ]
-  then
-    "$path"
-  else
-    return 0
-  fi
-}
-
-function is_erl_running() {
-    if [ -f $PIDFILE ]; then
-      ERL_PID=$(cat $PIDFILE 2>/dev/null)
-      $(ps --pid $ERL_PID) && return 0
-      return 1
+    local path="$OPENSHIFT_REPO_DIR/.openshift/action_hooks/$1"
+    if [ -f "$path" -a -x "$path" ]
+    then
+        "$path"
+    else
+        return 0
     fi
 }
 
+function is_erl_running() {
+    manager /dev/null ping
+    # TODO: we could actually bundle the nodetool in the cartridge
+    # which makes sense, because we rely on it and it is generic.
+    return 0
+}
+
+function get_release_version() {
+    START_ERL=`cat $OPENSHIFT_REPO_DIR/release/releases/start_erl.data`
+    ERTS_VSN=${START_ERL% *}
+    APP_VSN=${START_ERL#* }
+    echo "${APP_VSN}"
+}
+
+# we rewrite the vm args, to ensure that these params
+# get populated in vm.args in the release
+# we output the result to vm.args.origin
+function rewrite_vm_args() {
+    declare -A CUSTOM_ARGS
+    CUSTOM_ARGS['-kernel inet_dist_listen_min']="${OPENSHIFT_ERL_CLUSTER_PROXY_PORT}"
+    CUSTOM_ARGS['-kernel inet_dist_listen_max']="${OPENSHIFT_ERL_CLUSTER_PROXY_PORT}"
+    CUSTOM_ARGS['-kernel inet_dist_use_interface']="${OPENSHIFT_ERL_USE_INTERFACE}"
+    CUSTOM_ARGS['-name']="${OPENSHIFT_GEAR_UUID}@${OPENSHIFT_GEAR_DNS}"
+    CUSTOM_ARGS['-setcookie']="openshift"
+
+    VERSION=$(get_release_version)
+    vmargs_file_in="$OPENSHIFT_REPO_DIR/release/releases/$VERSION/vm.args"
+    vmargs_file_orig="${vmargs_file_in}.orig"
+    vmargs_file_out="${vmargs_file_in}"
+
+    #backup original file only the first time
+    if [ ! -f $vmargs_file_orig ]; then
+        cp $vmargs_file_in $vmargs_file_orig
+    fi
+    cp $vmargs_file_orig $vmargs_file_out
+
+    # replace or append values
+    for key in "${!CUSTOM_ARGS[@]}"
+    do
+        grep -q "^$key" $vmargs_file_out && sed -i "s/^$key.*/$key ${CUSTOM_ARGS[$key]}/g" $vmargs_file_out || echo "$key ${CUSTOM_ARGS[$key]}" >> $vmargs_file_out
+    done
+
+}
+
+# custom logfile for openshift events
+function get_logfile() {
+    echo "$OPENSHIFT_ERL_DIR/logs/erlang.log"
+}
+
+# expects two parameters: logfile + start | stop | ping | console
+function manager() {
+    MANAGER=`find $OPENSHIFT_REPO_DIR/release/bin/ -executable -type f`
+    nohup "${MANAGER} $2" >> $1 2>&1 &
+}
+
+# Openshift api : start
 function start() {
-    echo "Starting Erlang cartridge"
-    erl -kernel inet_dist_listen_min ${OPENSHIFT_ERL_CLUSTER_PROXY_PORT} \
-      inet_dist_listen_max ${OPENSHIFT_ERL_CLUSTER_PROXY_PORT} \
-      inet_dist_use_interface ${OPENSHIFT_ERL_USE_INTERFACE} \
-      -name "${OPENSHIFT_GEAR_UUID}@${OPENSHIFT_GEAR_DNS}" \
-      -setcookie bla -detached
-    [ "$?" == "0" ] && echo $$ > $PIDFILE
+    client_message "Starting Erlang cartridge"
+
+    rewrite_vm_args
+
+    logf=$(get_logfile)
+
+    pushd "$OPENSHIFT_REPO_DIR" > /dev/null
+    {
+        if [ -d "release/bin" ]; then
+            client_message "`date +"%F %T"`: Starting application '$OPENSHIFT_APP_NAME' ..."
+
+            manager $logf start
+
+            ret=$?
+            npid=$!
+            if [ $ret -eq 0 ]; then
+                echo "Application '$OPENSHIFT_APP_NAME' started ok. "
+            else
+                client_message "Application '$OPENSHIFT_APP_NAME' failed to start - $ret" 1>&2
+                exit $ret
+            fi
+        else
+            client_message "WARN: Could not release/bin, will not start"
+        fi
+    } >> $logf
+
     run_hook start
 }
 
 function stop() {
     echo "Stopping Erlang cart"
-    [ -r $PIDFILE ] && ERL_PID=$(cat $PIDFILE 2>/dev/null)
-    if [ -n "$ERL_PID" ]; then
-      /bin/kill $ERL_PID
-      rm -f $PIDFILE
-    fi
+    logf=$(get_logfile)
+    manager $logf stop
     run_hook stop
 }
 
@@ -48,12 +120,12 @@ function restart() {
 }
 
 function status() {
-   if [ is_erl_running ]
-   then
-      client_result "Application is running"
-   else
-      client_result "Application is either stopped or inaccessible"
-   fi
+    if [ is_erl_running ]
+    then
+        client_result "Application is running"
+    else
+        client_result "Application is either stopped or inaccessible"
+    fi
 }
 
 function reload() {
@@ -62,17 +134,34 @@ function reload() {
 }
 
 function tidy() {
-  client_message "Emptying log dir: $OPENSHIFT_ERL_LOG_DIR"
-  shopt -s dotglob
-  rm -rf $OPENSHIFT_ERL_LOG_DIR/*
+    client_message "Emptying log dir: $OPENSHIFT_ERL_LOG_DIR"
+    shopt -s dotglob
+    rm -rf $OPENSHIFT_ERL_LOG_DIR/*
 }
 
+function dotest() {
+    DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+    OPENSHIFT_ERL_CLUSTER_PROXY_PORT="proxy_port"
+    OPENSHIFT_ERL_USE_INTERFACE="127.0.0.2"
+    OPENSHIFT_GEAR_UUID="gearuuid"
+    OPENSHIFT_GEAR_DNS="geardns"
+
+    OPENSHIFT_CARTRIDGE_SDK_BASH=${DIR}/test/bash
+    OPENSHIFT_REPO_DIR=${DIR}/test/
+
+    #get_release_version
+    rewrite_vm_args
+}
+
+
 case "$1" in
-  start)     start ;;
-  stop)      stop ;;
-  restart)   restart ;;
-  status)    status ;;
-  reload)    reload ;;
-  tidy)      tidy ;;
-  *)         exit 0
+    start)     start ;;
+    stop)      stop ;;
+    restart)   restart ;;
+    status)    status ;;
+    reload)    reload ;;
+    tidy)      tidy ;;
+    test)      dotest ;;
+    *)         exit 0
 esac

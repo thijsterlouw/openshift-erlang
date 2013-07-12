@@ -1,0 +1,3 @@
+client_message() {
+    echo "TEST: $1"
+}
