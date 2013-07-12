@@ -16,7 +16,7 @@ Categories:
   - service
   - erlang
   - experimental
-  - web cartridge
+  - web_framework
 Website: https://github.com/spilgames/
 Cart-Data:
   - Key: OPENSHIFT_ERL_LOG_DIR
