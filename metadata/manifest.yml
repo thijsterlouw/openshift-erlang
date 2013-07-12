@@ -1,7 +1,7 @@
 Name: erlang
 Cartridge-Short-Name: ERL
 Display-Name: Erlang 15
-Source-Url: git://github.com/spil-jasper/openshift-erlang.git
+Source-Url: git://github.com/thijsterlouw/openshift-erlang.git
 Description: "Erlang OTP framework for OpenShift"
 Version: "15"
 License: "ASL 2.0"
