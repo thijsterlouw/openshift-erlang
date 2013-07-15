@@ -14,3 +14,6 @@ DIY-type cartridges are not needed anymore, except perhaps as a template.
 ```
 ./bin/control test
 ```
+
+# TODO
+Need to make sure the project is build before attempting to run it.
