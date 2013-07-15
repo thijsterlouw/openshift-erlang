@@ -109,12 +109,15 @@ function stop() {
     echo "Stopping Erlang cart"
     logf=$(get_logfile)
 
-    if [ -d "release/bin" ]; then
-        manager /dev/null stop
-    else
-        client_message "WARN: Could not find release/bin, will not stop"
-    fi
-       
+    pushd "$OPENSHIFT_REPO_DIR" > /dev/null
+    {
+        if [ -d "release/bin" ]; then
+            manager $logf stop
+        else
+            client_message "WARN: Could not find release/bin, will not stop"
+        fi
+    } >> $logf
+
     run_hook stop
 }
 
