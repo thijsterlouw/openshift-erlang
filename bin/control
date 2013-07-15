@@ -28,7 +28,7 @@ function is_erl_running() {
 }
 
 function get_release_version() {
-    START_ERL=`cat $OPENSHIFT_REPO_DIR/release/releases/start_erl.data`
+    START_ERL=`cat $OPENSHIFT_REPO_DIR/rel/release/releases/start_erl.data`
     ERTS_VSN=${START_ERL% *}
     APP_VSN=${START_ERL#* }
     echo "${APP_VSN}"
