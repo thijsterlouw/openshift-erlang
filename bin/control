@@ -61,7 +61,6 @@ function rewrite_vm_args() {
     do
         grep -q "^$key" $vmargs_file_out && sed -i "s/^$key.*/$key ${CUSTOM_ARGS[$key]}/g" $vmargs_file_out || echo "$key ${CUSTOM_ARGS[$key]}" >> $vmargs_file_out
     done
-
 }
 
 # custom logfile for openshift events
@@ -99,7 +98,7 @@ function start() {
                 exit $ret
             fi
         else
-            client_message "WARN: Could not release/bin, will not start"
+            client_message "WARN: Could not find release/bin, will not start"
         fi
     } >> $logf
 
@@ -109,7 +108,13 @@ function start() {
 function stop() {
     echo "Stopping Erlang cart"
     logf=$(get_logfile)
-    manager $logf stop
+
+    if [ -d "release/bin" ]; then
+        manager /dev/null stop
+    else
+        client_message "WARN: Could not find release/bin, will not stop"
+    fi
+       
     run_hook stop
 }
 
