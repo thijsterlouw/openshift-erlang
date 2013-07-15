@@ -28,7 +28,7 @@ function is_erl_running() {
 }
 
 function get_release_version() {
-    START_ERL=`cat $OPENSHIFT_REPO_DIR/rel/release/releases/start_erl.data`
+    START_ERL=`cat $OPENSHIFT_REPO_DIR/release/releases/start_erl.data`
     ERTS_VSN=${START_ERL% *}
     APP_VSN=${START_ERL#* }
     echo "${APP_VSN}"
@@ -78,7 +78,7 @@ function manager() {
 function start() {
     client_message "Starting Erlang cartridge"
 
-    rewrite_vm_args
+    #rewrite_vm_args
 
     logf=$(get_logfile)
 
