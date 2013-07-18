@@ -28,7 +28,7 @@ function is_erl_running() {
 }
 
 function get_release_version() {
-    START_ERL=`cat $OPENSHIFT_REPO_DIR/release/releases/start_erl.data`
+    START_ERL=`cat $OPENSHIFT_REPO_DIR/rel/release/releases/start_erl.data`
     ERTS_VSN=${START_ERL% *}
     APP_VSN=${START_ERL#* }
     echo "${APP_VSN}"
@@ -37,16 +37,17 @@ function get_release_version() {
 # we rewrite the vm args, to ensure that these params
 # get populated in vm.args in the release
 # we output the result to vm.args.origin
+# OPENSHIFT_ERL_CLUSTER_PORT refers to Private-Port-Name in the manifest
 function rewrite_vm_args() {
     declare -A CUSTOM_ARGS
-    CUSTOM_ARGS['-kernel inet_dist_listen_min']="${OPENSHIFT_ERL_CLUSTER_PROXY_PORT}"
-    CUSTOM_ARGS['-kernel inet_dist_listen_max']="${OPENSHIFT_ERL_CLUSTER_PROXY_PORT}"
+    CUSTOM_ARGS['-kernel inet_dist_listen_min']="${OPENSHIFT_ERL_CLUSTER_PORT}"
+    CUSTOM_ARGS['-kernel inet_dist_listen_max']="${OPENSHIFT_ERL_CLUSTER_PORT}"
     CUSTOM_ARGS['-kernel inet_dist_use_interface']="${OPENSHIFT_ERL_USE_INTERFACE}"
     CUSTOM_ARGS['-name']="${OPENSHIFT_GEAR_UUID}@${OPENSHIFT_GEAR_DNS}"
     CUSTOM_ARGS['-setcookie']="openshift"
 
     VERSION=$(get_release_version)
-    vmargs_file_in="$OPENSHIFT_REPO_DIR/release/releases/$VERSION/vm.args"
+    vmargs_file_in="$OPENSHIFT_REPO_DIR/rel/release/releases/$VERSION/vm.args"
     vmargs_file_orig="${vmargs_file_in}.orig"
     vmargs_file_out="${vmargs_file_in}"
 
@@ -70,7 +71,7 @@ function get_logfile() {
 
 # expects two parameters: logfile + start | stop | ping | console
 function manager() {
-    MANAGER=`find $OPENSHIFT_REPO_DIR/release/bin/ -executable -type f`
+    MANAGER=`find $OPENSHIFT_REPO_DIR/rel/release/bin/ -executable -type f`
     nohup "${MANAGER} $2" >> $1 2>&1 &
 }
 
@@ -78,7 +79,7 @@ function manager() {
 function start() {
     client_message "Starting Erlang cartridge"
 
-    #rewrite_vm_args
+    # rewrite_vm_args
 
     logf=$(get_logfile)
 
@@ -98,7 +99,7 @@ function start() {
                 exit $ret
             fi
         else
-            client_message "WARN: Could not find release/bin, will not start"
+            client_message "WARN: Could not find rel/release/bin, will not start"
         fi
     } >> $logf
 
@@ -114,7 +115,7 @@ function stop() {
         if [ -d "release/bin" ]; then
             manager $logf stop
         else
-            client_message "WARN: Could not find release/bin, will not stop"
+            client_message "WARN: Could not find rel/release/bin, will not stop"
         fi
     } >> $logf
 

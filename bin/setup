@@ -16,4 +16,5 @@ pushd $OPENSHIFT_REPO_DIR
 	ln -s rel/release release
 popd
 
-client_result "Disclaimer: This is an experimental cartridge that provides a way to try unsupported languages, frameworks, and middleware on Openshift."
+# this message will be shown on user UI when they install this cartridge
+client_result "Disclaimer: This is an experimental cartridge to support Erlang on Openshift. It requires a running EPMD on each node."
