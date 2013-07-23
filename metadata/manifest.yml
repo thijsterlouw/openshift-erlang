@@ -76,10 +76,7 @@ Subscribes:
 Scaling:
   Min: 1
   Max: -1
-Group-Overrides:
-  - components:
-    - erlang-15
-    - web_framework
+
 # CLUSTER_PROXY_PORT: Erlang distribution needs a public listening port, because Erlang Nodes
 #     need to connect directly with eachother (they normally form a fully connected network).
 #     The value of the private port is not important.
