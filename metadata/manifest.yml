@@ -79,11 +79,11 @@ Scaling:
 Group-Overrides:
   - components:
     - erlang-15
-    - web_proxy
     - web_framework
 # CLUSTER_PROXY_PORT: Erlang distribution needs a public listening port, because Erlang Nodes
 #     need to connect directly with eachother (they normally form a fully connected network).
 #     The value of the private port is not important.
+# Mappins is needed to prevent errors in auto-scaled instances ()
 Endpoints:
   - Private-IP-Name:   IP
     Private-Port-Name: CLUSTER_PORT
