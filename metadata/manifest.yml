@@ -74,7 +74,7 @@ Native-Requires:
 
 Scaling:
   Min: 1
-  Max: -1
+  Max: 100
 # ERLANG-CLUSTER-INFO: this event is used to inform other gears about the existance of this gear.
 #     The other gears need to know the Host, so they can find the EPMD on the new gear,
 #     ask which nodes are running there and then form a network.
