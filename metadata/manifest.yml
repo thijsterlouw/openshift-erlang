@@ -62,6 +62,7 @@ Cart-Data:
 Suggests:
 
 Provides:
+  - erl-15
   - erlang-15
   - "erlang"
   - "erlang (version) = 15"
@@ -81,14 +82,33 @@ Publishes:
   publish-erlang-cluster:
     Type: "NET_TCP:erlang-cluster-info"
     Description: "Inform other gears about the existance of this gear"
+  publish-http-url:
+    Type: "NET_TCP:httpd-proxy-info"
+  publish-gear-endpoint:
+    Type: "NET_TCP:gear-endpoint-info"    
 Subscribes:
   set-erlang-cluster:
     Type: "NET_TCP:erlang-cluster-info"
+Group-Overrides:
+  - components:
+    - erl-15
+    - web_proxy    
 # CLUSTER_PROXY_PORT: Erlang distribution needs a public listening port, because Erlang Nodes
 #     need to connect directly with eachother (they normally form a fully connected network).
 #     The value of the private port is not important.
 # Mappins is needed to prevent errors in auto-scaled instances ()
 Endpoints:
+  - Private-IP-Name:   IP
+    Private-Port-Name: PORT
+    Private-Port:      8080
+    Public-Port-Name:  PROXY_PORT
+    Mappings:
+      - Frontend:      ""
+        Backend:       ""
+        Options:       { websocket: true }
+      - Frontend:      "/health"
+        Backend:       ""
+        Options:       { health: true }
   - Private-IP-Name:   IP
     Private-Port-Name: CLUSTER_PORT
     Private-Port:      30000
