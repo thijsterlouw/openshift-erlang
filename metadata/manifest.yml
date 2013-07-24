@@ -59,10 +59,21 @@ Cart-Data:
   - Key: OPENSHIFT_GEAR_UUID
     Type: environment
     Description: "Unique ID which identified the gear. This value changes between gears."
+Suggests:
+
 Provides:
   - erlang-15
-  - erlang
-  - "erlang(version) = 15"
+  - "erlang"
+  - "erlang (version) = 15"
+Requires:
+
+Conflicts:
+
+Native-Requires:
+
+Scaling:
+  Min: 1
+  Max: -1
 # ERLANG-CLUSTER-INFO: this event is used to inform other gears about the existance of this gear.
 #     The other gears need to know the Host, so they can find the EPMD on the new gear,
 #     ask which nodes are running there and then form a network.
@@ -73,26 +84,22 @@ Publishes:
 Subscribes:
   set-erlang-cluster:
     Type: "NET_TCP:erlang-cluster-info"
-Scaling:
-  Min: 1
-  Max: -1
-
 # CLUSTER_PROXY_PORT: Erlang distribution needs a public listening port, because Erlang Nodes
 #     need to connect directly with eachother (they normally form a fully connected network).
 #     The value of the private port is not important.
 # Mappins is needed to prevent errors in auto-scaled instances ()
 Endpoints:
   - Private-IP-Name:   IP
-    Private-Port-Name: HTTP_PORT
+    Private-Port-Name: PORT
     Private-Port:      8080
-    Public-Port-Name:  HTTP_PROXY_PORT
+    Public-Port-Name:  PROXY_PORT
     Mappings:
       - Frontend:      ""
         Backend:       ""
-        Options:       { "websocket": 1}
+        Options:       { websocket: true }
       - Frontend:      "/health"
         Backend:       ""
-        Options:       { "health": 1}
+        Options:       { health: true }
   - Private-IP-Name:   IP
     Private-Port-Name: CLUSTER_PORT
     Private-Port:      30000
